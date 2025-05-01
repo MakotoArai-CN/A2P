@@ -15,7 +15,7 @@
 // @grant        GM_getValue
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     window.onload = function () {
@@ -33,20 +33,20 @@
 
         function preparePotplayerInteraction(videoElement, check = true) {
             const videoUrl = videoElement.src;
-            const flag = 0;
             console.log(`检测到视频链接: ${videoUrl}`);
 
             creatBtn(videoElement);
             if (check) {
                 window.location.href = `potplayer://${videoUrl}`;
                 // 检测是否播放，如果正在播放则暂停网页的播放
+                var pause_Flag = 0;
                 const checkTimer = setInterval(() => {
                     if (!videoElement.paused) {
                         videoElement.pause();
                         clearInterval(checkTimer);
                     }
-                    flag++;
-                    if (flag > 30) clearInterval(checkTimer);
+                    pause_Flag++;
+                    if (pause_Flag > 30) clearInterval(checkTimer);
                 }, 1000);
             };
 
@@ -77,8 +77,8 @@
             </style>
         )`);
 
-        /* 右键菜单 */
-        menu.innerHTML = `
+            /* 右键菜单 */
+            menu.innerHTML = `
             <div class="usercm" style="left: 199px; top: 5px; display: none;">
                 <ul>
                     <li><a href="/"><i class="fa fa-home fa-fw"></i><span>首页</span></a></li>
@@ -92,96 +92,96 @@
                 </ul>
             </div>
             `;
-        document.body.appendChild(menu);
-        // 自定义鼠标右键
-        // 自定义鼠标右键菜单行为
-        (function () {
-            let mouseX = 0;
-            let mouseY = 0;
-            let windowWidth = 0;
-            let windowHeight = 0;
+            document.body.appendChild(menu);
+            // 自定义鼠标右键
+            // 自定义鼠标右键菜单行为
+            (function () {
+                let mouseX = 0;
+                let mouseY = 0;
+                let windowWidth = 0;
+                let windowHeight = 0;
 
-            // 获取元素
-            const menu = document.querySelector('.usercm');
+                // 获取元素
+                const menu = document.querySelector('.usercm');
 
-            // 鼠标移动事件
-            window.addEventListener('mousemove', function (e) {
-                windowWidth = window.innerWidth;
-                windowHeight = window.innerHeight;
-                mouseX = e.clientX;
-                mouseY = e.clientY;
+                // 鼠标移动事件
+                window.addEventListener('mousemove', function (e) {
+                    windowWidth = window.innerWidth;
+                    windowHeight = window.innerHeight;
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
 
-                // 设置菜单位置
-                let left = e.pageX;
-                let top = e.pageY;
+                    // 设置菜单位置
+                    let left = e.pageX;
+                    let top = e.pageY;
 
-                if (mouseX + menu.offsetWidth >= windowWidth) {
-                    left = left - menu.offsetWidth - 5;
-                }
-                if (mouseY + menu.offsetHeight >= windowHeight) {
-                    top = top - menu.offsetHeight - 5;
-                }
-
-                // 绑定右键点击事件
-                document.documentElement.addEventListener('contextmenu', function (event) {
-                    if (event.button === 2) { // 右键点击
-                        event.preventDefault();
-                        menu.style.left = `${left}px`;
-                        menu.style.top = `${top}px`;
-                        menu.style.display = 'block';
+                    if (mouseX + menu.offsetWidth >= windowWidth) {
+                        left = left - menu.offsetWidth - 5;
                     }
+                    if (mouseY + menu.offsetHeight >= windowHeight) {
+                        top = top - menu.offsetHeight - 5;
+                    }
+
+                    // 绑定右键点击事件
+                    document.documentElement.addEventListener('contextmenu', function (event) {
+                        if (event.button === 2) { // 右键点击
+                            event.preventDefault();
+                            menu.style.left = `${left}px`;
+                            menu.style.top = `${top}px`;
+                            menu.style.display = 'block';
+                        }
+                    });
+
+                    // 点击隐藏菜单
+                    document.documentElement.addEventListener('click', function () {
+                        menu.style.display = 'none';
+                    });
                 });
 
-                // 点击隐藏菜单
-                document.documentElement.addEventListener('click', function () {
-                    menu.style.display = 'none';
-                });
-            });
+                // 禁用默认右键菜单
+                window.oncontextmenu = function (e) {
+                    e.preventDefault();
+                    return false;
+                };
 
-            // 禁用默认右键菜单
-            window.oncontextmenu = function (e) {
-                e.preventDefault();
-                return false;
-            };
+                // 判断是否是移动端
+                const userAgent = navigator.userAgent;
+                const mobileKeywords = ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod'];
+                let isMobile = false;
 
-            // 判断是否是移动端
-            const userAgent = navigator.userAgent;
-            const mobileKeywords = ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod'];
-            let isMobile = false;
-
-            for (let keyword of mobileKeywords) {
-                if (userAgent.indexOf(keyword) > -1) {
-                    isMobile = true;
-                    break;
+                for (let keyword of mobileKeywords) {
+                    if (userAgent.indexOf(keyword) > -1) {
+                        isMobile = true;
+                        break;
+                    }
                 }
-            }
 
-            // 非移动端才启用自定义右键菜单
-            if (!isMobile) {
-                // 上面已经实现了 mouseMoveShow 和 disabledContextMenu
-                console.log('已启用自定义右键菜单');
-            }
-        })();
-        const potplayer = document.querySelector(".potplayer");
-        const aa2p = document.querySelector(".aa2p");
-        const videoUrl = videoElement.src;
-        potplayer.addEventListener("click", function () {
-            window.location.href = `potplayer://${videoUrl}`;
-            // 暂停播放
-            videoElement.pause();
-        })
+                // 非移动端才启用自定义右键菜单
+                if (!isMobile) {
+                    // 上面已经实现了 mouseMoveShow 和 disabledContextMenu
+                    // console.log('已启用自定义右键菜单');
+                }
+            })();
+            const potplayer = document.querySelector(".potplayer");
+            const aa2p = document.querySelector(".aa2p");
+            const videoUrl = videoElement.src;
+            potplayer.addEventListener("click", function () {
+                window.location.href = `potplayer://${videoUrl}`;
+                // 暂停播放
+                videoElement.pause();
+            })
 
-        aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>${GM_getValue("check") ? "关闭自动跳转" : "开启自动跳转"}</span>`;
-        aa2p.addEventListener("click", function () {
-            const check = GM_getValue("check") ?? false;
-            if (check) {
-                GM_setValue("check", false);
-                aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>开启自动跳转</span>`;
-            } else {
-                GM_setValue("check", true);
-                aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>关闭自动跳转</span>`;
-            }
-        })
-    }
+            aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>${GM_getValue("check") ? "关闭自动跳转" : "开启自动跳转"}</span>`;
+            aa2p.addEventListener("click", function () {
+                const check = GM_getValue("check") ?? false;
+                if (check) {
+                    GM_setValue("check", false);
+                    aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>开启自动跳转</span>`;
+                } else {
+                    GM_setValue("check", true);
+                    aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>关闭自动跳转</span>`;
+                }
+            })
+        }
     }
 })();
