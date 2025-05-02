@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         A2P
 // @namespace    http://tampermonkey.net/
-// @version      1.0.3
+// @version      1.0.4
 // @description  Anime2Potplayer，用Potplayer打开浏览器播放的动漫，这样就可以使用SVP4补帧啦！
 // @author       MakotoArai(https://github.com/MakotoArai-CN)
 // @supportURL   https://blog.ciy.cool
@@ -11,6 +11,7 @@
 // @match        *.mutedm.com/*
 // @match        *.iyinghua.com/*
 // @match        *.5dm.link/*
+// @match        *dmd77.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // ==/UserScript==
@@ -18,23 +19,21 @@
 'use strict';
 
 window.onload = function () {
-    console.info("%cA2P%c%s", "color:red;font-size:40px;font-weight:bold;", "color:black;font-size:16px;font-weight:normal", GM_info.script.version);
+    console.info("%cA2P%c%s", "color:red;font-size:40px;font-weight:bold;", "color:black;font-size:16px;font-weight:normal", "\n" + GM_info.script.version);
 
     // 定时器用于动态嗅探视频链接
     const videoTimer = setInterval(findVideoUrl, 1000);
-
+    
     // 域名包含 anich.emmmm.eu.org 则启用下面的逻辑
     if (window.location.href.includes("anich.emmmm.eu.org")) {
-        // 存入url方便对比
-        GM_setValue("url", window.location.href);
-
         // 定时器检测url是否改变，如果改变则重新调用findVideoUrl
-        const timer = setInterval(function () {
-            if (GM_getValue("url") != window.location.href) {
-                clearInterval(timer);
+        setInterval(function () {
+            if (GM_getValue("url") !== window.location.href) {
+                // 存入url方便对比
+                GM_setValue("url", window.location.href);
                 findVideoUrl();
             }
-        }, 1000);
+        }, 1500);
     }
 
     function findVideoUrl() {
@@ -56,13 +55,12 @@ window.onload = function () {
             // 检测是否播放，如果正在播放则暂停网页的播放
             var pause_Flag = 0;
             const checkTimer = setInterval(() => {
-                if (!videoElement.paused) {
-                    videoElement.pause();
-                    clearInterval(checkTimer);
-                }
-                if (pause_Flag > 100) clearInterval(checkTimer);
+                const isPlaying = !videoElement.paused && !videoElement.ended && videoElement.readyState > 2;
+                // console.log(isPlaying ? "正在播放" : "已暂停或结束");
+                if (isPlaying) videoElement.pause();
+                if (!isPlaying || pause_Flag > 100) clearInterval(checkTimer);
                 pause_Flag++;
-            }, 1000);
+            }, 1500);
         };
 
     }
@@ -101,7 +99,7 @@ window.onload = function () {
                     <li><a href="javascript:history.go(1);"><i class="fa fa-arrow-right fa-fw"></i><span>前进</span></a></li>
                     <li><a href="javascript:history.go(-1);"><i class="fa fa-arrow-left fa-fw"></i><span>后退</span></a></li>
                     <li style="border-bottom:1px solid gray"><a href="javascript:window.location.reload();"><i class="fa fa-refresh fa-fw"></i><span>重载网页</span></a></li>
-                    <li><a href="javascript:void(0);" class="potplayer"><i class="fa fa-arrow-right fa-fw"></i><span>Potplayer</span></a></li>
+                    <li><a href="javascript:void(0);" class="potplayer"><i class="fa fa-arrow-right fa-fw"></i><span>Potplayer(X)</span></a></li>
                     <li><a href="javascript:void(0);" class="aa2p"><i class="fa fa-arrow-right fa-fw"></i><span>自动跳转</span></a></li>
                     <li><a href="https://blog.ciy.cool"><i class="fa fa-pencil-square-o fa-fw"></i><span>关于我</span></a></li>
                 </ul>
@@ -185,6 +183,19 @@ window.onload = function () {
             // 暂停播放
             videoElement.pause();
         })
+
+        // Alt + X  按键跳转
+        document.onkeydown = function (e) {
+            const keyNum = window.event ? e.keyCode : e.which;
+            if (e.altKey && Number.isInteger(keyNum)) {
+                switch (keyNum) {
+                    case 88:
+                        window.location.href = `potplayer://${videoUrl}`;
+                        videoElement.pause();
+                        break;
+                }
+            }
+        };
 
         aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>${GM_getValue("check") ? "关闭自动跳转" : "开启自动跳转"}</span>`;
         aa2p.addEventListener("click", function () {

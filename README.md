@@ -28,7 +28,7 @@ Anime2Potplayer一开始其实是看番需要下载，再使用Potplayer补帧�
 
 - ✅手动跳转Potplayer
 - ✅自动跳转Potplayer
-- ✅自动暂停网页播放（MuteFun可能存在暂停失败的情况）
+- ✅自动暂停网页播放
 - ❌自动播放下一集
 
 ## 5. 鸣谢
