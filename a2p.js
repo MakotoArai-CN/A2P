@@ -22,9 +22,26 @@ window.onload = function () {
 
     // 定时器用于动态嗅探视频链接
     const videoTimer = setInterval(findVideoUrl, 1000);
+    console.log(window.location.href.includes("anich.emmmm.eu.org"));
+
+    // 域名包含 anich.emmmm.eu.org 则启用下面的逻辑
+    if (window.location.href.includes("anich.emmmm.eu.org")) {
+        // 存入url方便对比
+        GM_setValue("url", window.location.href);
+
+        // 定时器检测url是否改变，如果改变则重新调用findVideoUrl
+        const timer = setInterval(function () {
+            if (GM_getValue("url") != window.location.href) {
+                clearInterval(timer);
+                findVideoUrl();
+            }
+        }, 1000);
+    }
+
     function findVideoUrl() {
         const videoElement = document.querySelector("video");
         if (videoElement && videoElement.src) {
+            if (videoElement.src.includes("blob:")) return;
             clearInterval(videoTimer);
             preparePotplayerInteraction(videoElement, GM_getValue("check") ?? false);
         }
@@ -44,8 +61,8 @@ window.onload = function () {
                     videoElement.pause();
                     clearInterval(checkTimer);
                 }
+                if (pause_Flag > 100) clearInterval(checkTimer);
                 pause_Flag++;
-                if (pause_Flag > 30) clearInterval(checkTimer);
             }, 1000);
         };
 
