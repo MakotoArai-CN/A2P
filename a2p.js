@@ -22,7 +22,6 @@ window.onload = function () {
 
     // 定时器用于动态嗅探视频链接
     const videoTimer = setInterval(findVideoUrl, 1000);
-    console.log(window.location.href.includes("anich.emmmm.eu.org"));
 
     // 域名包含 anich.emmmm.eu.org 则启用下面的逻辑
     if (window.location.href.includes("anich.emmmm.eu.org")) {
