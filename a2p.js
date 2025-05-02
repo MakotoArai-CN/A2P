@@ -11,7 +11,7 @@
 // @match        *.mutedm.com/*
 // @match        *.iyinghua.com/*
 // @match        *.5dm.link/*
-// @match        *dmd77.com/*
+// @match        *.dmd77.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // ==/UserScript==
