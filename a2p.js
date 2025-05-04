@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         A2P
 // @namespace    http://tampermonkey.net/
-// @version      1.0.5
+// @version      1.1.0
 // @description  Anime2Potplayer，用Potplayer打开浏览器播放的动漫，这样就可以使用SVP4补帧啦！
 // @author       MakotoArai(https://github.com/MakotoArai-CN)
 // @supportURL   https://blog.ciy.cool
@@ -12,18 +12,84 @@
 // @match        *.iyinghua.com/*
 // @match        *.5dm.link/*
 // @match        *.dmd77.com/*
+// @match        *.agefans.la/*
+// @match        *43.240.156.118:8443/*
+// @match        *tinaacg.net/*
+// @match        *susudyy.com/*
+// @match        *.5o5k.com/*
+// @match        *.k6dm.com/*
+// @match        *.233dm.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // ==/UserScript==
 
 'use strict';
 
+const m3u8Urls = new Set();
+let resultsShown = false;
+
+function showResults(title, text, timeout) {
+    // 发送桌面通知
+    if (typeof GM_notification !== 'undefined') {
+        GM_notification({
+            title: title,
+            text: text,
+            timeout: timeout
+        });
+    }
+}
+
+// 拦截所有网络请求
+if (typeof GM_xmlhttpRequest !== 'undefined') {
+    const originalXHR = unsafeWindow.XMLHttpRequest;
+    unsafeWindow.XMLHttpRequest = function () {
+        const xhr = new originalXHR();
+        const originalOpen = xhr.open;
+
+        xhr.open = function (method, url) {
+            if (url && /\.m3u8($|\?)/i.test(url)) {
+                m3u8Urls.add(url);
+                showResults("M3U8嗅探到:", url, 3000);
+                console.log('拦截到M3U8 (XHR):', url);
+                GM_setValue("Reallyurl", url);
+            }
+            return originalOpen.apply(this, arguments);
+        };
+
+        return xhr;
+    };
+}
+
+// 监听动态创建的video元素
+new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+        mutation.addedNodes.forEach(function (node) {
+            if (node.nodeName === 'VIDEO') checkVideoElement(node);
+            if (node.querySelectorAll) node.querySelectorAll('video').forEach(checkVideoElement);
+        });
+    });
+}).observe(document, { childList: true, subtree: true });
+
+/**
+ * .m3u8嗅探
+ * @param {*} video 
+ */
+function checkVideoElement(video) {
+    if (video.src && /\.m3u8($|\?)/i.test(video.src)) {
+        m3u8Urls.add(video.src);
+        // console.log('发现M3U8 video元素:', video.src);
+        // showResults();
+    }
+}
+// 初始检查
+document.querySelectorAll('video').forEach(checkVideoElement);
+// console.log('M3U8综合嗅探已激活');
+
 window.onload = function () {
     console.info("%cA2P%c%s", "color:red;font-size:40px;font-weight:bold;", "color:black;font-size:16px;font-weight:normal", "\n" + GM_info.script.version);
-
     // 定时器用于动态嗅探视频链接
     const videoTimer = setInterval(findVideoUrl, 1000);
-    
+
     // 域名包含 anich.emmmm.eu.org 则启用下面的逻辑
     if (window.location.href.includes("anich.emmmm.eu.org")) {
         // 定时器检测url是否改变，如果改变则重新调用findVideoUrl
@@ -36,22 +102,31 @@ window.onload = function () {
         }, 1500);
     }
 
+    function Launch(App, url) {
+        try {
+            window.location.href = `${App}://${url}`;
+            console.log("Launch to:"+url);
+            
+        } catch (error) {
+            alert(`请先安装 ${App}`);
+        }
+    }
+
     function findVideoUrl() {
         const videoElement = document.querySelector("video");
         if (videoElement && videoElement.src) {
-            if (videoElement.src.includes("blob:")) return;
             clearInterval(videoTimer);
             preparePotplayerInteraction(videoElement, GM_getValue("check") ?? false);
         }
     }
 
     function preparePotplayerInteraction(videoElement, check = true) {
-        const videoUrl = videoElement.src;
+        let videoUrl = videoElement.src;
         console.log(`检测到视频链接: ${videoUrl}`);
-
+        if (videoElement.src.includes("blob:")) videoUrl = GM_getValue("Reallyurl");;
         creatBtn(videoElement);
         if (check) {
-            window.location.href = `potplayer://${videoUrl}`;
+            Launch("potplayer", videoUrl)
             // 检测是否播放，如果正在播放则暂停网页的播放
             var pause_Flag = 0;
             const checkTimer = setInterval(() => {
@@ -72,7 +147,6 @@ window.onload = function () {
         `);
         // 右键菜单
         var menu = document.createElement("div");
-        // 插入自定义css
         document.head.insertAdjacentHTML("beforeend", `
             <style>
                  a {text-decoration: none;}
@@ -89,24 +163,31 @@ window.onload = function () {
                 div.usercm{background:#fff !important;}
             </style>
         )`);
-
-        /* 右键菜单 */
         menu.innerHTML = `
             <div class="usercm" style="left: 199px; top: 5px; display: none;">
                 <ul>
-                    <li><a href="/"><i class="fa fa-home fa-fw"></i><span>首页</span></a></li>
-                    <li><a href="javascript:void(0);" onclick="'' == (window.getSelection ? window.getSelection() : document.selection.createRange().text) ? console.log() : document.execCommand('Copy')"><i class="fa fa-copy fa-fw"></i><span>复制</span></a></li>
-                    <li><a href="javascript:history.go(1);"><i class="fa fa-arrow-right fa-fw"></i><span>前进</span></a></li>
-                    <li><a href="javascript:history.go(-1);"><i class="fa fa-arrow-left fa-fw"></i><span>后退</span></a></li>
                     <li style="border-bottom:1px solid gray"><a href="javascript:window.location.reload();"><i class="fa fa-refresh fa-fw"></i><span>重载网页</span></a></li>
-                    <li><a href="javascript:void(0);" class="potplayer"><i class="fa fa-arrow-right fa-fw"></i><span>Potplayer(X)</span></a></li>
-                    <li><a href="javascript:void(0);" class="aa2p"><i class="fa fa-arrow-right fa-fw"></i><span>自动跳转</span></a></li>
-                    <li><a href="https://blog.ciy.cool"><i class="fa fa-pencil-square-o fa-fw"></i><span>关于我</span></a></li>
+                    <li><a href="javascript:void(0);" class="potplayer"><i class="fas fa-external-link-alt"></i><span>Potplayer(X)</span></a></li>
+                    <li><a href="javascript:void(0);" class="aa2p"><i class="fas fa-robot"></i><span>自动跳转</span></a></li>
+                    <li><a href="https://blog.ciy.cool"><i class="fas fa-blog"></i><span>关于我</span></a></li>
                 </ul>
             </div>
             `;
         document.body.appendChild(menu);
-        // 自定义鼠标右键
+
+        function aa2pFun() {
+            const check = GM_getValue("check") ?? false;
+            if (check) {
+                GM_setValue("check", false);
+                aa2p.innerHTML = `<i class="fas fa-toggle-off"></i><span>开启自动跳转</span>`;
+            } else {
+                GM_setValue("check", true);
+                aa2p.innerHTML = `<i class="fas fa-toggle-on"></i><span>关闭自动跳转</span>`;
+            }
+        }
+
+
+
         // 自定义鼠标右键菜单行为
         (function () {
             let mouseX = 0;
@@ -128,12 +209,8 @@ window.onload = function () {
                 let left = e.pageX;
                 let top = e.pageY;
 
-                if (mouseX + menu.offsetWidth >= windowWidth) {
-                    left = left - menu.offsetWidth - 5;
-                }
-                if (mouseY + menu.offsetHeight >= windowHeight) {
-                    top = top - menu.offsetHeight - 5;
-                }
+                if (mouseX + menu.offsetWidth >= windowWidth) left = left - menu.offsetWidth - 5;
+                if (mouseY + menu.offsetHeight >= windowHeight) top = top - menu.offsetHeight - 5;
 
                 // 绑定右键点击事件
                 document.documentElement.addEventListener('contextmenu', function (event) {
@@ -169,44 +246,34 @@ window.onload = function () {
                 }
             }
 
-            // 非移动端才启用自定义右键菜单
-            if (!isMobile) {
-                // 上面已经实现了 mouseMoveShow 和 disabledContextMenu
-                // console.log('已启用自定义右键菜单');
-            }
         })();
         const potplayer = document.querySelector(".potplayer");
         const aa2p = document.querySelector(".aa2p");
-        const videoUrl = videoElement.src;
+        let videoUrl = videoElement.src;
+        if (videoElement.src.includes("blob:")) videoUrl = GM_getValue("Reallyurl");;
         potplayer.addEventListener("click", function () {
-            window.location.href = `potplayer://${videoUrl}`;
-            // 暂停播放
+            Launch("potplayer", videoUrl);
             videoElement.pause();
         })
 
-        // Alt + X  按键跳转
         document.onkeydown = function (e) {
             const keyNum = window.event ? e.keyCode : e.which;
             if (e.altKey && Number.isInteger(keyNum)) {
                 switch (keyNum) {
-                    case 88:
-                        window.location.href = `potplayer://${videoUrl}`;
+                    case 88://  X 键--> potplayer
+                        console.log("potplayer://" + videoUrl);
+                        Launch("potplayer", videoUrl)
                         videoElement.pause();
+                        break;
+                    case 90://  Z 键--> 自动跳转
+                        console.log("%cAuto jump %c%s","",GM_getValue("check")?"color:green;font-weight:bold;":"color:red;font-weight:bold;", + GM_getValue("check")?"Turn on":"Turn off");
+                        aa2pFun();
                         break;
                 }
             }
         };
 
-        aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>${GM_getValue("check") ? "关闭自动跳转" : "开启自动跳转"}</span>`;
-        aa2p.addEventListener("click", function () {
-            const check = GM_getValue("check") ?? false;
-            if (check) {
-                GM_setValue("check", false);
-                aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>开启自动跳转</span>`;
-            } else {
-                GM_setValue("check", true);
-                aa2p.innerHTML = `<i class="fa fa-arrow-right fa-fw"></i><span>关闭自动跳转</span>`;
-            }
-        })
+        aa2p.innerHTML = `<i class="fas fa-toggle-${GM_getValue("check") ? "on" : "off"}"></i><span>${GM_getValue("check") ? "关闭自动跳转" : "开启自动跳转"}</span>`;
+        aa2p.addEventListener("click", function () { aa2pFun(); });
     }
 }
