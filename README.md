@@ -11,7 +11,7 @@ Anime2Potplayer一开始其实是看番需要下载，再使用Potplayer补帧�
 
 ## 2. 使用
 
-默认为视频播放区域右键菜单，等待视频加载完毕后右键即可。
+默认为视频播放区域右键菜单，等待视频加载完毕后右键即可。也可以等待页面加载完毕后，按下快捷键Alt+X唤起Potplayer播放，Alt+Z开启/关闭自动跳转（部分站点不显示右键菜单时适用）。
 
 > 注意：只有视频加载完毕才有右键菜单
 
@@ -28,6 +28,7 @@ Anime2Potplayer一开始其实是看番需要下载，再使用Potplayer补帧�
 |[樱花动漫](http://www.iyinghua.com/)|❓部分支持|✅|除合集、电影外都支持|
 
 |M3U8站点|状态|大陆直连|支持的资源|
+| :---: | :---: | :---: | :---: |
 |[TinaACG](https://tinaacg.net/)|✅支持|✅|全部|
 |[速速电影院](http://susudyy.com/)|✅支持|✅|全部|
 |[AGE动漫](https://www.agefans.la/)|❓部分支持|✅|支持西瓜/非凡/暴风/无尽|
@@ -40,6 +41,7 @@ Anime2Potplayer一开始其实是看番需要下载，再使用Potplayer补帧�
 - ✅手动跳转Potplayer
 - ✅自动跳转Potplayer
 - ✅自动暂停网页播放
+- ✅快捷键支持
 - ❌自动播放下一集
 
 ## 5. 鸣谢
@@ -48,6 +50,11 @@ Anime2Potplayer一开始其实是看番需要下载，再使用Potplayer补帧�
 - [FontAwesome](https://fontawesome.com/)
 - [油猴](https://greasyfork.org/)
 - [脚本猫](https://scriptcat.org/)
+
+## 6. 已知的BUG
+
+1. 某些网站视频首次加载无法自动暂停播放，刷新页面即可
+2. 某些网站不会弹出提醒，但是你依旧可以右键
 
 ## 联系我
 

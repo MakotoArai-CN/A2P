@@ -21,6 +21,10 @@
 // @match        *.233dm.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        unsafeWindow
+// @grant        GM_xmlhttpRequest
+// @grant        GM_notification
+// @grant        GM_addStyle
 // ==/UserScript==
 
 'use strict';
