@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         A2P
 // @namespace    http://tampermonkey.net/
-// @version      1.1.0
+// @version      1.1.1
 // @description  Anime2Potplayer，用Potplayer打开浏览器播放的动漫，这样就可以使用SVP4补帧啦！
 // @author       MakotoArai(https://github.com/MakotoArai-CN)
 // @supportURL   https://blog.ciy.cool
