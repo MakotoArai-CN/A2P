@@ -1,14 +1,12 @@
 // ==UserScript==
 // @name         A2P
-// @namespace:en    https://greasyfork.org/zh-CN/scripts/534597-a2p
-// @namespace:zh    https://scriptcat.org/zh-CN/script-show-page/3331
+// @namespace    https://github.com/MakotoArai-CN/A2P
 // @version      1.1.2
-// @description:en  Anime2Potplayer，Open the anime played in the browser with Potplayer, and then use SVP4 to fill the frame locally! Potplayer needs to be an installed version, otherwise it won't take effect.
-// @description:zh  Anime2Potplayer，用Potplayer打开浏览器播放的动漫，然后本地使用SVP4补帧！Potplayer需要是安装版，否则不生效。
+// @description  Anime2Potplayer，用Potplayer打开浏览器播放的动漫，然后本地使用SVP4补帧！Potplayer需要是安装版，否则不生效。
 // @author       MakotoArai(https://github.com/MakotoArai-CN)
 // @supportURL   https://blog.ciy.cool
 // @license      GPL-v3
-// @icon          https://cravatar.cn/avatar/1e84fce3269537e4aa7473602516bf6d?s=256
+// @icon         https://cravatar.cn/avatar/1e84fce3269537e4aa7473602516bf6d?s=256
 // @match        *anich.emmmm.eu.org/*
 // @match        *.mutedm.com/*
 // @match        *.iyinghua.com/*
