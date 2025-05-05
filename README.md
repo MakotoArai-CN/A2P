@@ -60,7 +60,7 @@ Anime2Potplayer一开始其实是看番需要下载，再使用Potplayer补帧�
 
 ## 联系作者
 
-直接在[Github](https://github.com/MakotoArai-CN/A2P)提交[issue](https://github.com/MakotoArai-CN/A2P/issues)或者在当前页面提交，也欢迎到我的[blog](https://blog.ciy.cool/)留言。
+直接在[Github](https://github.com/MakotoArai-CN/A2P)提交[issue](https://github.com/MakotoArai-CN/A2P/issues)或者在脚本页提交issue，也欢迎到我的[blog](https://blog.ciy.cool/)留言。
 
 ## 协议
 
