@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         A2P
-// @namespace    http://tampermonkey.net/
-// @version      1.1.1
-// @description  Anime2Potplayer，用Potplayer打开浏览器播放的动漫，这样就可以使用SVP4补帧啦！
+// @namespace:en    https://greasyfork.org/zh-CN/scripts/534597-a2p
+// @namespace:zh    https://scriptcat.org/zh-CN/script-show-page/3331
+// @version      1.1.2
+// @description:en  Anime2Potplayer，Open the anime played in the browser with Potplayer, and then use SVP4 to fill the frame locally! Potplayer needs to be an installed version, otherwise it won't take effect.
+// @description:zh  Anime2Potplayer，用Potplayer打开浏览器播放的动漫，然后本地使用SVP4补帧！Potplayer需要是安装版，否则不生效。
 // @author       MakotoArai(https://github.com/MakotoArai-CN)
 // @supportURL   https://blog.ciy.cool
 // @license      GPL-v3
@@ -25,6 +27,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_notification
 // @grant        GM_addStyle
+// @grant        GM_setClipboard
 // ==/UserScript==
 
 'use strict';
@@ -38,7 +41,11 @@ function showResults(title, text, timeout) {
         GM_notification({
             title: title,
             text: text,
-            timeout: timeout
+            timeout: timeout,
+            //点击后触发复制
+            onclick: function () {
+                GM_setClipboard(text);
+            }
         });
     }
 }
@@ -53,7 +60,7 @@ if (typeof GM_xmlhttpRequest !== 'undefined') {
         xhr.open = function (method, url) {
             if (url && /\.m3u8($|\?)/i.test(url)) {
                 m3u8Urls.add(url);
-                showResults("M3U8嗅探到:", url, 3000);
+                if (GM_getValue("notify")) showResults("M3U8嗅探到:", url, 5000);
                 console.log('拦截到M3U8 (XHR):', url);
                 GM_setValue("Reallyurl", url);
             }
@@ -109,8 +116,8 @@ window.onload = function () {
     function Launch(App, url) {
         try {
             window.location.href = `${App}://${url}`;
-            console.log("Launch to:"+url);
-            
+            console.log("Launch to:" + url);
+
         } catch (error) {
             alert(`请先安装 ${App}`);
         }
@@ -173,20 +180,21 @@ window.onload = function () {
                     <li style="border-bottom:1px solid gray"><a href="javascript:window.location.reload();"><i class="fa fa-refresh fa-fw"></i><span>重载网页</span></a></li>
                     <li><a href="javascript:void(0);" class="potplayer"><i class="fas fa-external-link-alt"></i><span>Potplayer(X)</span></a></li>
                     <li><a href="javascript:void(0);" class="aa2p"><i class="fas fa-robot"></i><span>自动跳转</span></a></li>
-                    <li><a href="https://blog.ciy.cool"><i class="fas fa-blog"></i><span>关于我</span></a></li>
+                    <li><a href="javascript:void(0);" class="notify"><i class="far fa-bell-slash"></i><span>关闭通知</span></a></li>
+                    <li><a href="https://blog.ciy.cool"><i class="fas fa-blog"></i><span>联系作者</span></a></li>
                 </ul>
             </div>
             `;
         document.body.appendChild(menu);
 
-        function aa2pFun() {
-            const check = GM_getValue("check") ?? false;
+        function menuFun(GMValue, element, icon_on, icon_off, text) {
+            const check = GM_getValue(GMValue) ?? false;
             if (check) {
-                GM_setValue("check", false);
-                aa2p.innerHTML = `<i class="fas fa-toggle-off"></i><span>开启自动跳转</span>`;
+                GM_setValue(GMValue, false);
+                element.innerHTML = `<i class="${icon_off}"></i><span>开启${text}</span>`;
             } else {
-                GM_setValue("check", true);
-                aa2p.innerHTML = `<i class="fas fa-toggle-on"></i><span>关闭自动跳转</span>`;
+                GM_setValue(GMValue, true);
+                element.innerHTML = `<i class="${icon_on}"></i><span>关闭${text}</span>`;
             }
         }
 
@@ -253,6 +261,7 @@ window.onload = function () {
         })();
         const potplayer = document.querySelector(".potplayer");
         const aa2p = document.querySelector(".aa2p");
+        const notify = document.querySelector(".notify");
         let videoUrl = videoElement.src;
         if (videoElement.src.includes("blob:")) videoUrl = GM_getValue("Reallyurl");;
         potplayer.addEventListener("click", function () {
@@ -270,14 +279,17 @@ window.onload = function () {
                         videoElement.pause();
                         break;
                     case 90://  Z 键--> 自动跳转
-                        console.log("%cAuto jump %c%s","",GM_getValue("check")?"color:green;font-weight:bold;":"color:red;font-weight:bold;", + GM_getValue("check")?"Turn on":"Turn off");
-                        aa2pFun();
+                        console.log("%cAuto jump %c%s", "", GM_getValue("check") ? "color:green;font-weight:bold;" : "color:red;font-weight:bold;", + GM_getValue("check") ? "Turn on" : "Turn off");
+                        menuFun("check", this, "fas fa-toggle-on", "fas fa-toggle-off", "自动跳转");
                         break;
                 }
             }
         };
 
-        aa2p.innerHTML = `<i class="fas fa-toggle-${GM_getValue("check") ? "on" : "off"}"></i><span>${GM_getValue("check") ? "关闭自动跳转" : "开启自动跳转"}</span>`;
-        aa2p.addEventListener("click", function () { aa2pFun(); });
+        aa2p.innerHTML = `<i class="${GM_getValue("check") ? "fas fa-toggle-on" : "fas fa-toggle-off"}"></i><span>${GM_getValue("check") ? "关闭自动跳转" : "开启自动跳转"}</span>`;
+        aa2p.addEventListener("click", function () { menuFun("check", this, "fas fa-toggle-on", "fas fa-toggle-off", "自动跳转"); });
+
+        notify.innerHTML = `<i class="${GM_getValue("notify") ? "fas fa-bell" : "far fa-bell-slash"}"}"></i><span>${GM_getValue("notify") ? "关闭通知" : "开启通知"}</span>`;
+        notify.addEventListener("click", function () { menuFun("notify", this, "fas fa-bell", "far fa-bell-slash", "通知"); });
     }
 }
