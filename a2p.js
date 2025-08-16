@@ -19,6 +19,7 @@
 // @match        *.5o5k.com/*
 // @match        *.k6dm.com/*
 // @match        *.233dm.com/*
+// @match        *.mgnacg.com/
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        unsafeWindow
@@ -98,6 +99,7 @@ window.onload = function () {
     console.info("%cA2P%c%s", "color:red;font-size:40px;font-weight:bold;", "color:black;font-size:16px;font-weight:normal", "\n" + GM_info.script.version);
     // 定时器用于动态嗅探视频链接
     const videoTimer = setInterval(findVideoUrl, 1000);
+    console.log(window.top != window ? "嗅探当前处于iframe中" : "嗅探当前不处于iframe中");
 
     // 域名包含 anich.emmmm.eu.org 则启用下面的逻辑
     if (window.location.href.includes("anich.emmmm.eu.org")) {
@@ -113,11 +115,18 @@ window.onload = function () {
 
     function Launch(App, url) {
         try {
+            if (window.top != window) {
+                window.top.postMessage({ type: 'launch', app: App, url: url }, '*');
+                console.log("Launch to (iframe):" + `${App}://${url}`);
+                return;
+            }
             window.location.href = `${App}://${url}`;
-            console.log("Launch to:" + url);
-
+            console.log(window.top != window ? "唤起当前处于iframe中" : "唤起当前不处于iframe中");
+            console.log("Launch to:" + `${App}://${url}`);
         } catch (error) {
-            alert(`请先安装 ${App}`);
+            if (error.message.includes("is not installed")) {
+                alert(`请先安装 ${App}`);
+            }
         }
     }
 
@@ -291,3 +300,26 @@ window.onload = function () {
         notify.addEventListener("click", function () { menuFun("notify", this, "fas fa-bell", "far fa-bell-slash", "通知"); });
     }
 }
+
+// 接收来自iframe的消息
+window.addEventListener('message', function (event) {
+    try {
+        if (event.data.type === 'launch') {
+            window.location.href = `${event.data.app}://${event.data.url}`;
+        }
+        // console.log(window.top != window ? "接收当前处于iframe中" : "接收当前不处于iframe中");
+    } catch (error) {
+        try {
+            if (window.top != window) {
+                window.top.location.href = `${event.data.app}://${event.data.url}`;
+                console.log("Launch to (iframe):" + `${event.data.app}://${event.data.url}`);
+                return;
+            }
+        } catch (error) {
+            if (error.message.includes("is not installed")) {
+                alert(`请先安装 ${event.data.app}`);
+            }
+        }
+    }
+
+});
