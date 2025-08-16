@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         A2P
 // @namespace    https://github.com/MakotoArai-CN/A2P
-// @version      1.1.2
+// @version      1.1.3
 // @description  Anime2Potplayer，用Potplayer打开浏览器播放的动漫，然后本地使用SVP4补帧！Potplayer需要是安装版，否则不生效。
 // @author       MakotoArai(https://github.com/MakotoArai-CN)
 // @supportURL   https://blog.ciy.cool
@@ -20,6 +20,7 @@
 // @match        *.k6dm.com/*
 // @match        *.233dm.com/*
 // @match        *.mgnacg.com/
+// @match        *.omofun2.xyz/
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        unsafeWindow
